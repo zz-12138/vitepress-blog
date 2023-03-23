@@ -4,8 +4,8 @@
     "vitepress": "^1.0.0-alpha.61"
   },
   "scripts": {
-    "dd": "vitepress dev docs",
+    "npm run docs:dev": "vitepress dev docs",
     "npm run docs:build": "vitepress build docs",
-    "dp": "vitepress preview docs"
+    "npm run docs:preview": "vitepress preview docs"
   }
 }
