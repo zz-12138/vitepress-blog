@@ -1,30 +1,22 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig } from "vitepress"
+import { mySidebar } from './routes'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   base: "/vitepress-blog/",
-  title: "My Awesome Project",
-  description: "A VitePress Site",
+  title: "WALL BLOG",
+  description: "a blog by VitePress Site",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/markdown-examples' }
+      { text: "主页", link: "/" },
+      { text: "博客", link: "/notes/JavaScript/ES6-总结" },
     ],
 
-    sidebar: [
-      {
-        text: 'Examples',
-        collapsed: true,
-        items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
-        ]
-      }
-    ],
+    sidebar: mySidebar,
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' }
-    ]
-  }
+      { icon: "github", link: "https://github.com/zz-12138" },
+    ],
+  },
 })
