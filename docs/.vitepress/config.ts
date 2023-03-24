@@ -7,7 +7,8 @@ export default defineConfig({
   title: "WALL BLOG",
   description: "a blog by VitePress Site",
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
+	outline: 3,
+	outlineTitle: '目录',
     nav: [
       { text: "主页", link: "/" },
       { text: "博客", link: "/notes/JavaScript/ES6-总结" },
