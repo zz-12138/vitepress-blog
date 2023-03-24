@@ -140,22 +140,22 @@
    * DML数据表记录的增删改操作
 
      ```sql
-    //给createTime、updateTime自动设置值
-     ALTER TABLE `childs` MODIFY `createTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-    ALTER TABLE `childs` MODIFY `updateTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-     																									 ON UPDATE CURRENT_TIMESTAMP;
-    //插入数据
-     INSERT INTO `childs` (name, phoneNum)
-    			 VALUES ('aa', '1112223333333');
-     						
-     //删除所有数据
-     DELETE FROM `childs`;
-     //删除符合条件的数据
-     DELETE FROM `childs` WHERE id = 115;
-     //更新所有数据
-     UPDATE `childs` SET name = 'aa', phoneNum = '111111';
-     //更新符合条件的数据
-     UPDATE `childs` SET name = 'aa', phoneNum = '1122222' WHERE id = 1;
+	 //给createTime、updateTime自动设置值
+	 ALTER TABLE `childs` MODIFY `createTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+	 ALTER TABLE `childs` MODIFY `updateTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+						 ON UPDATE CURRENT_TIMESTAMP;
+	 //插入数据
+	 INSERT INTO `childs` (name, phoneNum)
+				 VALUES ('aa', '1112223333333');
+							
+	 //删除所有数据
+	 DELETE FROM `childs`;
+	 //删除符合条件的数据
+	 DELETE FROM `childs` WHERE id = 115;
+	 //更新所有数据
+	 UPDATE `childs` SET name = 'aa', phoneNum = '111111';
+	 //更新符合条件的数据
+	 UPDATE `childs` SET name = 'aa', phoneNum = '1122222' WHERE id = 1;
      ```
      
    * DQL数据表的查询操作

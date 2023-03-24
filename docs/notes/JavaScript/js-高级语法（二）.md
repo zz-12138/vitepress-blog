@@ -445,9 +445,9 @@
        }
        
        Cat.prototype.miao = function() {
-    console.log(this.name + 'miao')
+		console.log(this.name + 'miao')
        }
-       
+	   
        const cat1 = new Cat('eat', 'lihua', 18)
        const cat2 = new Cat('fish', 'meiduan', 19)
        cat1.arr.push('wall')

@@ -556,7 +556,7 @@ const obj = {
       ```
 
       ```js
-    //2.事件监听原理
+	  //2.事件监听原理
       const lcEvent = {
           event: {
               

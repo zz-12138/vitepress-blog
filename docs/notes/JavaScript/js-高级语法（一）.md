@@ -44,8 +44,7 @@
        bar(),
    }
    
-   /**     **/
-var GO = {
+   var GO = {
        String: 'Class',
        Date: 'Class',
        setTimeout: 'Fnc',

@@ -325,7 +325,8 @@
      
      //创建一个日志写入流
      const logPath = path.join(__dirname, 'logs')
-    if (!fs.existsSync(logPath)) { fs.mkdirSync(logPath, err => console.log(err)) }
+	 
+     if (!fs.existsSync(logPath)) { fs.mkdirSync(logPath, err => console.log(err)) }
      const writerStream = fs.createWriteStream(`${logPath}/express.log`, {
          flags: 'a+'
      })

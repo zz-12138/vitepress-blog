@@ -90,12 +90,12 @@
      const path = require('path')
     
      const basePath = '../user/wall'
-   const filename = 'abc.txt'
-     //1.路径拼接
-     const filepath = path.resolve(basePath, filename) //path.resolve() 从右往左将path片段拼成绝对路径
-     const filepath2 = path.join(basePath, filename) //path.join()从左往右，将传入的path片段拼接成一个完成的地址console.log(filepath, filepath2) //D:\user\wall\abc.txt \user\wall\abc.txt
-   //2.获取路径信息(路径、文件名、文件后缀)
-     console.log(path.dirname(filepath), path.basename(filename), path.extname(filename)) 
+	 const filename = 'abc.txt'
+	 //1.路径拼接
+	 const filepath = path.resolve(basePath, filename) //path.resolve() 从右往左将path片段拼成绝对路径
+	 const filepath2 = path.join(basePath, filename) //path.join()从左往右，将传入的path片段拼接成一个完成的地址console.log(filepath, filepath2) //D:\user\wall\abc.txt \user\wall\abc.txt
+     //2.获取路径信息(路径、文件名、文件后缀)
+	 console.log(path.dirname(filepath), path.basename(filename), path.extname(filename)) 
      //D:\user\wall abc.txt .txt
      ```
      
