@@ -6,6 +6,7 @@ export default defineConfig({
   base: "/vitepress-blog/",
   title: "WALL BLOG",
   description: "a blog by VitePress Site",
+  lastUpdated: true,
   themeConfig: {
 	outline: 3,
 	outlineTitle: '目录',
@@ -15,6 +16,7 @@ export default defineConfig({
     ],
 
     sidebar: mySidebar,
+	lastUpdatedText: '上次更新时间',
 
     socialLinks: [
       { icon: "github", link: "https://github.com/zz-12138" },
