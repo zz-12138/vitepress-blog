@@ -437,7 +437,7 @@
      //抽象类：父类定义抽象方法，子类实现
      abstract class Sharp {
          abstract getArea(): number;
-   }
+	 }
      
      class Rectangle extends Sharp {
          private width: number
