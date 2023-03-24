@@ -22,21 +22,21 @@ outline: deep
 
 5. 属性描述符：在严格模式可以通过`Object.defineProperty(obj, 'attribute', {options})`创建一个属性描述符
 	* 数据属性描述符
-		* [[Configurable]]：表示属性是否可以通过delete删除，重新定义，或者是否可以被修改成存取属性描述符
-			* 对象上默认的属性，[[Configurable]]默认为true
-			* 通过描述符定义的属性，[Configurable]默认为false
-		* [[Enumerable]]：表示属性是否可枚举，即是否可以通过`for in/Object.keys()`返回该属性
-			* 对象上默认的属性，[[Enumerable]]默认为true
+		* `[[Configurable]]`：表示属性是否可以通过delete删除，重新定义，或者是否可以被修改成存取属性描述符
+			* 对象上默认的属性，`[[Configurable]]`默认为true
+			* 通过描述符定义的属性，`[Configurable]`默认为false
+		* `[[Enumerable]]`：表示属性是否可枚举，即是否可以通过`for in/Object.keys()`返回该属性
+			* 对象上默认的属性，`[[Enumerable]]`默认为true
 			* 通过描述符定义的属性，[Enumerable]默认为false
-		* [[Writeable]]：表示是否可修改属性的值
-			* 对象上默认的属性，[[Writeable]]默认为true
-			* 通过描述符定义的属性，[Writeable]默认为false
-		* [[value]]：属性的值
+		* `[[Writeable]]`：表示是否可修改属性的值
+			* 对象上默认的属性，`[[Writeable]]`默认为true
+			* 通过描述符定义的属性，`[Writeable]`默认为false
+		* `[[value]]`：属性的值
 			* 默认为undefined
 
 	* 数据存储描述符
-		* get()：`obj.key`调用该方法
-		* set()：`obj.key = val`调用该方法
+		* `get()`：`obj.key`调用该方法
+		* `set()`：`obj.key = val`调用该方法
 
 ```js
 //描述符作用

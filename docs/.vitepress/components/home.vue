@@ -7,14 +7,9 @@
                 <h3>And I'm a <span ref="typedRef"></span></h3>
                 <p>Good Good Study Day Day Up!</p>
                 <div class="social-media">
-                    <a href="#" style="--i: 7"><i class="bx bxl-tiktok"></i></a>
-                    <a href="#" style="--i: 8"
-                        ><i class="bx bxl-facebook-circle"></i
-                    ></a>
-                    <a href="#" style="--i: 9"><i class="bx bxl-google"></i></a>
-                    <a href="#" style="--i: 10"
-                        ><i class="bx bxl-linkedin-square"></i
-                    ></a>
+                    <a href="#" style="--i: 7"><i class="bx bx-code-alt"></i></a>
+                    <a href="#" style="--i: 8"><i class='bx bx-ghost'></i></a>
+                    <a href="#" style="--i: 9"><i class='bx bx-face'></i></a>
                 </div>
                 <a href="#" class="btn" @click="startCv">Start CV</a>
             </div>
@@ -46,7 +41,7 @@ onMounted(() => {
 })
 
 const startCv = () => {
-    router.go("/notes/JavaScript/ES6-总结")
+    router.go("/vitepress-blog/notes/JavaScript/ES6-总结")
 }
 </script>
 
