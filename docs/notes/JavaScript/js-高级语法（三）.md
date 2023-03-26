@@ -135,13 +135,13 @@ outline: deep
        /**
         * Map(3) {
          'a' => 1,
-         2 => 'b',
+          2 => 'b',
          Map(3) {
-           { name: 'obj1' } => 'aaa',
+         	{ name: 'obj1' } => 'aaa',
            { name: 'obj2' } => 'bbb',
-           1 => 'ccc'
-         } => 'c'
-       }
+           1 => 'ccc'} 
+           => 'c'
+         }
         */
        
        // 3.get(key)、has(key)、delete(key)、clear()等方法
@@ -200,4 +200,124 @@ outline: deep
        // 2.应用场景: Vue3响应式原理（后边实现）
        ```
 
-       
+
+## es7 新增
+
+1. `Array includes`：判断数组中是否存在某个元素
+
+   ```js
+   const arr = [1, 2, 3, 4, 5, NaN]
+   
+   console.log(arr.includes(NaN)) //true
+   console.log(arr.indexOf(NaN) !== -1) //false, indexOf无法判断数组中NaN
+   ```
+
+2. `**`：指数运算符
+
+   ```js
+   const res1 = Math.pow(3, 3) //9
+   const res2 = 3 ** 3 //9
+   ```
+
+## es8 新增
+
+1. `Object.values()`：获取一个对象所有value
+
+   ```js
+   const obj = {
+       name: 'wall',
+       age: 18
+   }
+   
+   console.log(Object.values(obj)) // [ 'wall', 18 ]
+   console.log(Object.values([1, 2, 3, 4, 5])) // [ 1, 2, 3, 4, 5 ]
+   console.log(Object.values('12345')) // [ '1', '2', '3', '4', '5' ]
+   ```
+
+2. `Object.entries()`：获取一个数组，数组中存放着可枚举属性的键值对数组
+
+   ```js
+   const obj1 = {
+       name: 'wall',
+       age: 18
+   }
+   
+   console.log(Object.entries(obj1)) // [ [ 'name', 'wall' ], [ 'age', 18 ] ]
+   ```
+
+3. `padStart padEnd`：字符串首尾添加内容
+
+   ```js
+   const str = 'hello world'
+   console.log(str.padStart(15, '*').padEnd(19, '*')) // ****hello world****
+   
+   // 案例: 隐藏手机号前7位
+   const phoneNum = '18379238027'
+   const lastNum = phoneNum.slice(-4)
+   const newPhoneNum = lastNum.padStart(11, '*')
+   console.log(newPhoneNum) // *******8027
+   ```
+
+## es10 新增
+
+1. `flat() 数组扁平化`：方法会按照一个可指定的深度递归遍历数组，并将所有元素与遍历到子数组中的元素合并为一个新数组
+
+   ```js
+   const arr1 = [1, 2, [3, 4], [[5, 6], [7, 8]]]
+   
+   console.log(arr1.flat(1)) // [ 1, 2, 3, 4, [ 5, 6 ], [ 7, 8 ] ], 一次降维
+   console.log(arr1.flat(2)) //[1, 2, 3, 4,5, 6, 7, 8], 二次降维
+   ```
+
+2. `flatMap(callback) 数组映射扁平化`： 先映射每一个元素，然后将结果压缩成一个新数组，即先map再flat
+
+   ```js
+   const arr2 = ['hello world', 'hello coder', 'hello wall']
+   
+   const newArr1 = arr2.flatMap(i => {
+       return i.split(' ')
+   })
+   // 等价于
+   const newArr2 = arr2.map(i => i.split(' ')).flat(1)
+   
+   console.log(newArr1, newArr2)
+   /**
+    * [ 'hello', 'world', 'hello', 'coder', 'hello', 'wall' ] 
+    * [ 'hello', 'world', 'hello', 'coder', 'hello', 'wall' ]
+    */
+   ```
+
+3. `Object.fromEntries()`：将entries转换为对象
+
+   ```js
+   const queryString = 'name=wall&id=114514'
+   const queryParams = new URLSearchParams(queryString) // URLSearchParams { 'name' => 'wall', 'id' => '114514' }
+   const queryObj = Object.fromEntries(queryParams)
+   const obj4 = { name: 'wall', id: 18 }
+   const res = Object.fromEntries(Object.entries(obj4))
+   console.log(queryObj) // { name: 'wall', id: '114514' }
+   console.log(res) // { name: 'wall', id: 18 }
+   ```
+
+4. `trim trimStart trimEnd`：去除首尾空格
+
+## es 11 新增
+
+1. `bigInt`：大数字数据类型，数字后面+n
+
+   ```js
+   const bigNum = Number.MAX_SAFE_INTEGER
+   const newNum = bigNum + 10 //不能相加
+   const newBigNum = bigNum + 10n //可以相加
+   ```
+
+2. `??`：空值合并运算符
+
+   ```js
+   const bol = '' || 0
+   const isRight = bol ?? 'default value' // 只有当bol为undefined和null时，才会取右边值
+   console.log(isRight) // default value
+   ```
+
+   
+
