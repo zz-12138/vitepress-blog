@@ -319,5 +319,121 @@ outline: deep
    console.log(isRight) // default value
    ```
 
+3. `globalThis`：不同环境下的全局对象，浏览器是window，node是this
+
+   ```js
+   console.log(globalThis) // node: global
+   console.log(globalThis) // 浏览器: window
+   ```
+
+4. `for...in`：遍历对象中的key
+
+   ```js
+   const obj = {
+       name: 'wall',
+       age: 3600
+   }
    
+   for (const key in obj) {
+       console.log(i) //name, age
+   }
+   ```
+
+## es12 新增
+
+1. `FinalizationRegistry 类` ：监听对象内存是否被销毁
+
+   ```js
+   const obj = { name: 'wall', age: 18 }
+   const finalRegister = new FinalizationRegister((value) => console.log(`注册的对象${value}内存被销毁`))
+   finalRegister.register(obj, 'obj') // 注册一个对象
+   obj = null
+   ```
+
+2. `WeakRef 类 `：创建弱引用对象
+
+   ```js
+   const obj = { name: 'wall', age: 18 }
+   const weakObj = new WeakRef(obj)
+   const isDistory = weakObj.deref().name // 如果没有被销毁返回原对象，如果被销毁返回undefined
+   ```
+
+## Proxy Reflect
+
+1.传统监听对象操作
+
+* 使用对象属性描述符`Object.defineProperty(obj, key, {})`
+
+* 该描述符被设计的初衷并不是为了监听对象操作，只是为了定义属性
+
+* 新增属性、删除属性等操作，该方法没办法监听
+
+  ```js
+  // 1.通过对象属性描述符
+  const obj = { name: 'wall', age: 18 }
+  Object.keys(obj).forEach(key => {
+      let value = obj[key]
+      Object.defineProperty(obj, key, {
+          get() {
+              return value //此处不能直接返回对象的属性obj[key]，循环调用
+          },
+          set(newValue) {
+              value = newValue
+          }
+      })
+  })
+  
+  obj.name = 'zz'
+  obj.age = 20
+  
+  console.log(obj) //{ name: [Getter/Setter], age: [Getter/Setter] }
+  console.log(obj.name, obj.age) //zz 20
+  ```
+
+2.通过Proxy类创建代理对象，通过代理对象监听对象所有操作
+
+* 先创建一个代理对象，之后对该原对象的操作都由代理对象完成，代理对象可以监听我们想要对原对象的操作
+
+  ```js
+  // 2.通过代理对象
+  const obj2 = { name: 'wall', age: 20 }
+  const proxyObj2 = new Proxy(obj2, {
+      // get捕获器
+      get(target, key) {
+          // target: 正在被代理的原始对象
+          console.log(target, key) // { name: 'wall', age: 30 } name
+          return target[key]
+      },
+      // set捕获器
+      set(target, key, newValue) {
+          target[key] = newValue
+          console.log(target, key, newValue) // { name: 'wall', age: 30 } age 30
+      },
+      // in捕获器
+      has(target, key) {
+          console.log(`监听到${key}属性in操作`) // 监听到name属性in操作
+          return key in target
+      },
+      // delete捕获器
+      deleteProperty(target, key) {
+          delete target[key]
+          console.log(`监听到${key}属性被删除`) // 监听到age属性被删除
+      }
+  })
+  
+  proxyObj2.age = 30
+  proxyObj2.name
+  
+  if ('name' in proxyObj2) {
+      console.log('存在name属性') // 存在name属性
+  }
+  
+  delete proxyObj2.age
+  
+  console.log(obj2, proxyObj2) //{ name: 'wall' } { name: 'wall' }
+  ```
+
+  
+
+
 
