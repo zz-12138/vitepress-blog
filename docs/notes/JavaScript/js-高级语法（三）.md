@@ -360,80 +360,141 @@ outline: deep
 
 ## Proxy Reflect
 
-1.传统监听对象操作
+1. 传统监听对象操作
 
-* 使用对象属性描述符`Object.defineProperty(obj, key, {})`
+    * 使用对象属性描述符`Object.defineProperty(obj, key, {})`
 
-* 该描述符被设计的初衷并不是为了监听对象操作，只是为了定义属性
+    * 该描述符被设计的初衷并不是为了监听对象操作，只是为了定义属性
 
-* 新增属性、删除属性等操作，该方法没办法监听
+    * 新增属性、删除属性等操作，该方法没办法监听
 
-  ```js
-  // 1.通过对象属性描述符
-  const obj = { name: 'wall', age: 18 }
-  Object.keys(obj).forEach(key => {
-      let value = obj[key]
-      Object.defineProperty(obj, key, {
-          get() {
-              return value //此处不能直接返回对象的属性obj[key]，循环调用
+    ```js
+    // 1.通过对象属性描述符
+    const obj = { name: 'wall', age: 18 }
+    Object.keys(obj).forEach(key => {
+        let value = obj[key]
+        Object.defineProperty(obj, key, {
+            get() {
+                return value //此处不能直接返回对象的属性obj[key]，循环调用
+            },
+            set(newValue) {
+                value = newValue
+            }
+        })
+    })
+    
+    obj.name = 'zz'
+    obj.age = 20
+    
+    console.log(obj) //{ name: [Getter/Setter], age: [Getter/Setter] }
+    console.log(obj.name, obj.age) //zz 20
+    ```
+
+2. 通过Proxy类创建代理对象，通过代理对象监听对象所有操作
+
+    * 先创建一个代理对象，之后对该原对象的操作都由代理对象完成，代理对象可以监听我们想要对原对象的操作
+
+    ```js
+    // 2.通过代理对象
+    const obj2 = { name: 'wall', age: 20 }
+    const proxyObj2 = new Proxy(obj2, {
+        // get捕获器
+        get(target, key) {
+            // target: 正在被代理的原始对象
+            console.log(target, key) // { name: 'wall', age: 30 } name
+            return target[key]
+        },
+        // set捕获器
+        set(target, key, newValue) {
+            target[key] = newValue
+            console.log(target, key, newValue) // { name: 'wall', age: 30 } age 30
+        },
+        // in捕获器
+        has(target, key) {
+            console.log(`监听到${key}属性in操作`) // 监听到name属性in操作
+            return key in target
+        },
+        // delete捕获器
+        deleteProperty(target, key) {
+            delete target[key]
+            console.log(`监听到${key}属性被删除`) // 监听到age属性被删除
+        }
+    })
+    
+    proxyObj2.age = 30
+    proxyObj2.name
+    
+    if ('name' in proxyObj2) {
+        console.log('存在name属性') // 存在name属性
+    }
+    
+    delete proxyObj2.age
+    
+    console.log(obj2, proxyObj2) //{ name: 'wall' } { name: 'wall' }
+    ```
+
+3. Proxy其他捕获器
+
+    <img src="../../public/Proxy捕获器.png" style="zoom: 80%;" />
+
+4. Proxy函数对象捕获器
+
+    ```js
+    // 函数式对象捕获器
+    function foo() {}
+    const proxyFoo = new Proxy(foo, {
+        // apply捕获器
+        apply(target, thisArg, argArr) {
+            console.log(`监听到了函数${target}apply操作`) //监听到了函数function foo() {}apply操作
+            return target.apply(thisArg, argArr)
+        },
+        // constructor捕获器
+        construct(target, argArr, newTarget) {
+            console.log(`监听到了函数${target}通过new操作符调用`) //监听到了函数function foo() {}通过new操作符调用
+            return new target(...argArr)
+        }
+    })
+
+    proxyFoo.apply({}, ['wall', 'zz'])
+    new proxyFoo('wall', 'zz')
+    ```
+
+5. Reflect的作用
+
+    * Reflect是一个对象，字面意思是反射
+
+    * 该对象提供了很多操作对象的方法，类似于Object中操作对象的方法
+
+      * 比如`Reflect.getPrototypeOf(target)`类似于`Object.getPrototypeOf()`
+      * 比如`Reflect.defineProperty(target, propertyKey, attributes)`类似于`Object.defineProperty()`
+
+    * 为什么要存在Reflect这样的对象
+
+      * 早期ECMA没有考虑到将操作对象的方法如何设计更规范，所以都放到了Object构造函数上
+      * 类似于in、delete等操作符让js看起来不美观
+
+    * Proxy的常用方法
+
+      <img src="../../public/Reflect常见方法.png" style="zoom: 80%;" />
+
+    * 对于代理对象的操作，不应该操作原对象，所以Reflect的用处就是避免对原对象进行操作
+
+      ```js
+      // Reflect的作用
+      const obj4 = { name: 'wall', age: 30 }
+      const obj4Proxy = new Proxy(obj4, {
+          get(target, key, receiver) {
+              // 返回代理对象的属性
+              return Reflect.get(target, key)
           },
-          set(newValue) {
-              value = newValue
+          set(target, key, newValue, receiver) {
+              // 给代理对象设置新属性
+              Reflect.set(target, key, newValue)
           }
       })
-  })
-  
-  obj.name = 'zz'
-  obj.age = 20
-  
-  console.log(obj) //{ name: [Getter/Setter], age: [Getter/Setter] }
-  console.log(obj.name, obj.age) //zz 20
-  ```
+      
+      obj4Proxy.name = 'zz'
+      console.log(obj4Proxy.name) // zz
+      ```
 
-2.通过Proxy类创建代理对象，通过代理对象监听对象所有操作
-
-* 先创建一个代理对象，之后对该原对象的操作都由代理对象完成，代理对象可以监听我们想要对原对象的操作
-
-  ```js
-  // 2.通过代理对象
-  const obj2 = { name: 'wall', age: 20 }
-  const proxyObj2 = new Proxy(obj2, {
-      // get捕获器
-      get(target, key) {
-          // target: 正在被代理的原始对象
-          console.log(target, key) // { name: 'wall', age: 30 } name
-          return target[key]
-      },
-      // set捕获器
-      set(target, key, newValue) {
-          target[key] = newValue
-          console.log(target, key, newValue) // { name: 'wall', age: 30 } age 30
-      },
-      // in捕获器
-      has(target, key) {
-          console.log(`监听到${key}属性in操作`) // 监听到name属性in操作
-          return key in target
-      },
-      // delete捕获器
-      deleteProperty(target, key) {
-          delete target[key]
-          console.log(`监听到${key}属性被删除`) // 监听到age属性被删除
-      }
-  })
-  
-  proxyObj2.age = 30
-  proxyObj2.name
-  
-  if ('name' in proxyObj2) {
-      console.log('存在name属性') // 存在name属性
-  }
-  
-  delete proxyObj2.age
-  
-  console.log(obj2, proxyObj2) //{ name: 'wall' } { name: 'wall' }
-  ```
-
-  
-
-
-
+      
