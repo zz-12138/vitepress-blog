@@ -497,4 +497,57 @@ outline: deep
       console.log(obj4Proxy.name) // zz
       ```
 
+    * recevier参数的作用
+    
+      ```js
+      // get和set方法中参数receiver作用
+      const obj5 = {
+          _name: 'zz',
+          get name() {
+              //此处this默认指向obj5，若想拦截_name属性，需要将this指向代理对象
+              return this._name
+          },
+          set name(name) {
+              this._name = name
+          }
+      }
+      let count = 0
       
+      const obj5Proxy = new Proxy(obj5, {
+          get(target, key, receiver) {
+              count ++
+              // receiver就是代理对象，此处将get方法中的this指向recevier
+              return Reflect.get(target, key, receiver)
+          },
+          set(target, key, newValue, receiver) {
+              Reflect.set(target, key, newValue, receiver)
+          }
+      })
+      
+      obj5Proxy.name = 'wall'
+      obj5Proxy.name
+      console.log(obj5Proxy, obj5) 
+      // { _name: 'wall', name: [Getter/Setter] } { _name: 'wall', name: [Getter/Setter] }
+      console.log(count) //2 调用了两次get方法
+      ```
+    
+    * Reflect.construct的作用
+    
+      ```js
+      // Reflect.construct()的作用: 改变对象的constructor
+      function Person(name, age) {
+          this.name = name
+          this.age = age
+      }
+      
+      function P() {}
+      
+      const p = Reflect.construct(Person, ['wall', 18], P)
+      console.log(p) // P { name: 'wall', age: 18 }
+      console.log(p.__proto__ == P.prototype) // true
+      ```
+    
+6. 响应式原理
+
+    * 响应式的含义：m有一个初始的值，有一段代码使用了这个值，如果m改变了，那么这段代码会重新执行
+    * 
