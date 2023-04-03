@@ -550,4 +550,148 @@ outline: deep
 6. 响应式原理
 
     * 响应式的含义：m有一个初始的值，有一段代码使用了这个值，如果m改变了，那么这段代码会重新执行
-    * 
+    
+    * 代码实现：
+    
+      ```js
+      // 响应式原理
+      
+      // 1.创建一个全局变量保存依赖
+      let activeReactiveFn = null
+      
+      // 2.创建副作用函数储存类
+      class Depend {
+          constructor() {
+              this.reactiveFns = new Set() //使用Set防止添加重复依赖
+          }
+      
+          // 自动添加依赖
+          depend() {
+              if (activeReactiveFn) {
+                  this.reactiveFns.add(activeReactiveFn)
+                  console.log(this.reactiveFns)
+              }
+          }
+      
+          // 执行副作用函数
+          notify() {
+              this.reactiveFns.forEach(fn => fn())
+          }
+      }
+      
+      
+      // 3.封装一个副作用函数
+      function watchEffect(fn) {
+          // 将依赖赋值给全局变量
+          activeReactiveFn = fn
+          // 执行依赖
+          fn()
+          // 将依赖置为空
+          activeReactiveFn = null
+      }
+      
+      // 4.封装一个依赖管理函数，每个对象的每个key映射一个depend对象: WeakMap ==> Map ==> depend
+      const targetMap = new WeakMap()
+      function getDepend(target, key) {
+          // 根据target对象获取map，如果不存在就创建map
+          let map = targetMap.get(target)
+          if (!map) {
+              map = new Map()
+              targetMap.set(target, map)
+          }
+      
+          // 根据key获取depend，如果不存在就创建depend
+          let depend = map.get(key)
+          if (!depend) {
+              depend = new Depend()
+              map.set(key, depend)
+          }
+      
+          return depend
+      }
+      
+      // 5.1封装一个响应式对象，监听对象响应式变化（vue3）
+      function reactiveObject3(obj) {
+          return new Proxy(obj, {
+              get(target, key, receiver) {
+                  // 依赖收集，获取属性对应的depend对象
+                  const dep = getDepend(target, key)
+                  dep.depend(activeReactiveFn)
+      
+                  return Reflect.get(target, key, receiver)
+              },
+              set(target, key, newValue, receiver) {
+                  Reflect.set(target, key, newValue, receiver)
+                  // 依赖遍历调用
+                  const dep = getDepend(target, key)
+                  dep.notify()
+              }
+          })
+      }
+      
+      // 5.2封装一个响应式对象，监听对象响应式变化（vue2）
+      function reactiveObject2(obj) {
+          Object.keys(obj).forEach(key => {
+              let value = obj[key]
+              Object.defineProperty(obj, key, {
+                  get() {
+                      // 依赖收集，获取属性对应的depend对象
+                      const dep = getDepend(obj, key)
+                      dep.depend(activeReactiveFn)
+      
+                      return value
+                  },
+                  set(newValue) {
+                      value = newValue
+      
+                      // 依赖遍历调用
+                      const dep = getDepend(obj, key)
+                      dep.notify()
+                  }
+              })
+          })
+          return obj
+      }
+      
+      const proxyObj = reactiveObject3({
+          name: 'a',
+          age: 18
+      })
+      
+      const proxyInfo = reactiveObject3({
+          name: 'b',
+          age: 20
+      })
+      
+      const obj = reactiveObject2({
+          name: 'c',
+          age: 22
+      })
+      
+      
+      // 6.副作用函数执行
+      /**obj */
+      watchEffect(function() {
+          console.log(`改变了proxyObj name属性: ${proxyObj.name}`)
+      })
+      
+      /**info */
+      watchEffect(function() {
+          console.log(`改变了proxyInfo name属性: ${proxyInfo.name}`)
+      })
+      
+      /**obj */
+      watchEffect(function() {
+          console.log(`改变了obj name属性: ${obj.name}`)
+      })
+      
+      
+      // 7.代理对象属性改变
+      proxyObj.name = 'aa'
+      proxyInfo.name = 'bb'
+      obj.name = 'cc'
+      ```
+
+## Promise
+
+1. 
