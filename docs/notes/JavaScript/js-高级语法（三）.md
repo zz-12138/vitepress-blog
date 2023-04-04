@@ -694,4 +694,90 @@ outline: deep
 
 ## Promise
 
-1. 
+1. Promise是一个类，翻译为承诺
+2. 通过new创建Promise对象时，需要传入一个回调函数，称之为executor
+   * 这个函数会立即执行，并且传入另外两个回调函数resolve，reject
+   * 当调用resolve函数时，会执行Promise对象的then方法传入的回调函数
+   * 当调用reject函数时，会执行Promise对象的catch方法传入的回调函数
+3. 使用Promise过程中，可以将其划分为三个状态
+   * pending：初始状态，当执行executor中代码时
+   * fulfilled：成功状态，执行了executor中的resolve函数
+   * rejected：失败状态，执行了executor中的rejected函数
+   * Promise的状态一旦锁定（成功/失败），就不可更改
+4. Promise对象上的方法:
+
+```js
+// 异步操作处理
+
+/**
+ * 回调函数：
+ * 弊端：
+ * 1.需要设计回调函数，回调函数的额名称，回调函数的使用
+ * 2.需要去理解别人封装好的函数如何使用
+ */
+
+// requestByCallback
+function requestByCallback(url, successCallback, errorCallback) {
+    // 模拟异步请求
+    setTimeout(() => {
+        if (url === 'ok') {
+            successCallback(url)
+        } else {
+            errorCallback(url)
+        }
+    }, 1000)
+}
+
+/**
+ * Promise
+ */
+
+
+//requestByPromise
+function requestByPromise(url) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (url === 'ok') {
+                resolve(url)
+            } else {
+                reject(url)
+            }
+        }, 2000)
+    })
+}
+
+
+requestByCallback('err', (res) => {
+    console.log(res)
+}, (err) => {
+    console.log(err) // err, 3
+})
+
+requestByPromise('ok')
+                    .then(res => console.log(res)) // ok, 4
+                    .catch(err => console.log(err))
+                    .finally(() => console.log('done')) // done, 5,无论状态成功还是失败都会执行
+
+
+// 当resolve传入一个新的Promise对象,该Promise的状态由新的Promise对象状态决定
+const p = new Promise((resolve, reject) => {
+    reject('err')
+})
+
+new Promise((resolve, reject) => {
+    resolve(p)
+}).then(res => console.log(res))
+  .catch(err => console.log(err)) // err, 2
+
+// 当resolve传入一个普通对象,该对象实现了then方法,那么也会执行then方法,并且由该对象决定后续状态(该对象实现了thenable)
+new Promise((resolve, reject) => {
+    resolve({
+        err: 'err',
+        then: function(resolve, reject) {
+            reject(this.err)
+        }
+    })
+}).then(res => console.log(res)) 
+  .catch(err => console.log(err)) //err, 1
+```
+

@@ -9,6 +9,7 @@ outline: deep
 1. 全局代码被解析时，v8引擎内部会帮我们创建一个GO（globalObject）对象
 2. v8为了执行代码，引擎内部在编译之前创建一个执行上下文（函数调用栈）
 3. 创建全局执行上下文（GEC）
+	
 	* 从上往下执行代码
 4. 函数块代码被解析式，GO对象会保存函数的地址
 5. 函数被调用时
@@ -43,7 +44,7 @@ outline: deep
 		   console.log(d) //50
 	   }
 	   
-	   bar(),
+	   bar()
 	}
 	
 	var GO = {
@@ -64,7 +65,7 @@ outline: deep
 	   f: undefined,
 	   bar: 0xabe //保存函数在内存的中地址
 	}
-	```
+	 ```
 <img src="../../public/执行上下文.png" alt="image" style="zoom:80%;" />
 
 ## 内存管理
@@ -274,7 +275,7 @@ outline: deep
 		bindFoo4(2, 3) //5 [String: 'bind']，此处显示绑定优先级大于默认绑定
 		```
 
-         
+     ​    
 
 		* new绑定：
 			* js中的函数可以当作一个类的构造函数来使用，也就是可以使用new关键字
@@ -607,7 +608,7 @@ console.log(res, res2) // [2, 3]
 	const now = log(new Date())
 	now('DEBUG', 'ERROR') //[23:12] - [DEBUG] - [ERROR]
 	now('FETURE', 'ADD NEW FUTURE') //[23:12] - [FETURE] - [ADD NEW FUTURE]
-	```
+	 ```
 
 6. 柯里化函数实现
 
@@ -636,7 +637,7 @@ console.log(res, res2) // [2, 3]
  const curriedFoo = curryingFn(foo)
  console.log(curriedFoo(1, 2, 3, 4)) //10
  console.log(curriedFoo(1)(2, 3)(4)) //10
- ```
+```
 
 7. 组合函数
 
@@ -658,7 +659,7 @@ console.log(res, res2) // [2, 3]
 	
 	const newComposeFn = compose(double, square)
 	console.log(newComposeFn(10)) //200
-	```
+	 ```
 	
 	* 实现一个组合函数
 	 ```js
@@ -694,7 +695,7 @@ console.log(res, res2) // [2, 3]
 	
 	const newComposeFn2 = composeFn(double, square)
 	console.log(newComposeFn2(10)) //400
-	```
+	 ```
 
 ## 严格模式（use strict）
 
