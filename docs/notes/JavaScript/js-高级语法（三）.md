@@ -856,7 +856,85 @@ outline: deep
    })
    ```
 
-7. 
+7. Promise类方法
+
+   ```js
+   // Promise类方法
+   
+   // 1.Promise.resolve() 返回一个fulfilled状态Promise对象，也可以实现传入Promise对象和thenable对象
+   const p = Promise.resolve(
+       { name: 'wall', age: 18 }
+   )
+   // 等价于
+   const p1 = new Promise((resolve) => {
+       resolve({ name: 'wall', age: 19 })
+   })
+   
+   p.then((res) => {
+       console.log(res)// { name: 'wall', age: 18 }
+   })
+   p1.then((res) => {
+       console.log(res) // { name: 'wall', age: 19 }
+   })
+   
+   // 2.Promise.reject() 返回一个rejected状态的Promise对象，但不能实现传入Promise对象和thenable对象
+   const p2 = Promise.reject('rejected err')
+   const p3 = Promise.reject({
+       then: (res) => console.log(res)
+   })
+   
+   p2.then((res) => {
+       console.log(res)
+   }).catch((err) => {
+       console.log(err) // rejected err
+   })
+   
+   p3.then(() => { }).catch(err => console.log(err)) // { then: [Function: then] }
+   
+   // 3. Promise.all([]) 传入一个Promise对象的数组，当数组内所有Promise都fulfilled时，再拿到结果，结果是一个存放着所有Promise结果的数组
+   // 如果数组内有一个Promise状态是rejected，那么整个Promise都是rejected
+   const pAll = Promise.all([p, p1, 'wall'])
+   pAll
+       .then(res => console.log(res)) //[ { name: 'wall', age: 18 }, { name: 'wall', age: 18 }, 'wall' ]
+       .catch(err => console.log(err))
+   
+   // 4.Promise.allSettled([]) 传入一个Promise对象的数组，当数组内所有Promise状态都敲定，再拿到结果，结果是一个存放着所有Promise结果的数组
+   // 此方法不论是fulfilled还是rejected都会将结果存放至数组
+   const pAllSettled = Promise.allSettled([p, p1, p2, 'wall'])
+   pAllSettled
+       .then((res) => console.log(res))
+       .catch((err) => console.log(err))
+   /**
+    * [
+       { status: 'fulfilled', value: { name: 'wall', age: 18 } },
+       { status: 'fulfilled', value: { name: 'wall', age: 18 } },
+       { status: 'rejected', reason: 'rejected err' },
+       { status: 'fulfilled', value: 'wall' }
+      ]
+    */
+   
+   // 5.Promise.race([]) 只要有一个Promise对象状态先变成了fulfilled,那么就结束
+   const p4 = new Promise((resolve, reject) => {
+       setTimeout(() => resolve('1s'), 1000)
+   })
+   
+   const p5 = new Promise((resolve, reject) => {
+       setTimeout(() => resolve('2s'), 2000)
+   })
+   
+   const pRace = Promise.race([p4, p5])
+   pRace.then((res) => console.log(res)) // 1s
+   
+   // 6.Promise.any([]) 至少有一个Promise状态是fulfilled才会返回该状态的结果,如果全是rejected状态,那么执行catch
+   const p6 = Promise.reject('err')
+   
+   const pAny = Promise.any([p5, p6])
+   pAny
+       .then(res => console.log(res)) // 2s
+       .catch(err => console.log(err))
+   ```
+
+8. 
 
 
 
