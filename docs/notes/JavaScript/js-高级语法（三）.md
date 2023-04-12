@@ -934,7 +934,236 @@ outline: deep
        .catch(err => console.log(err))
    ```
 
-8. 
+8. Promise类的实现
 
+   ```js
+   // 实现一个简单的Promise类
+   
+   const PENDING = 'pending'
+   const FULFILLED = 'fullfilled'
+   const REJECTED = 'rejected'
+   
+   // 用于捕获异常工具函数
+   const execFooWithCatchError = (execFn, value, resolve, reject) => {
+       try {
+           const res = execFn(value)
+           // 此处应该判断res是一个Promise还是thenable对象，从而决定下一步操作
+           resolve(res)
+       } catch (e) {
+           reject(e)
+       }
+   }
+   
+   class WPromise {
+       constructor(executor) {
+           this.status = PENDING
+           this.value = null
+           this.reason = null
+           this.onFulfilledFns = []
+           this.onRejectedFns = []
+   
+           const resolve = (res) => {
+               if (this.status === PENDING) {
+                   // 利用微任务队列将then回调函数延后调用
+                   queueMicrotask(() => {
+                       if (this.status !== PENDING) return
+                       this.status = FULFILLED
+                       this.value = res
+                       this.onFulfilledFns.forEach(fn => fn())
+                       // console.log('resolve')
+                   })
+               }
+   
+           }
+   
+           const reject = (err) => {
+               if (this.status === PENDING) {
+                   // 利用微任务队列将catch回调函数延后调用
+                   queueMicrotask(() => {
+                       if (this.status !== PENDING) return
+                       this.status = REJECTED
+                       this.reason = err
+                       this.onRejectedFns.forEach(fn => fn())
+                       // console.log('rejected')
+                   })
+               }
+           }
+   
+           // 捕获executor内部执行异常
+           try {
+               executor(resolve, reject)
+           } catch (e) {
+               reject(e)
+           }
+       }
+   
+       then(onFulfilled, onRejected) {
+           // 每次调then方法之前判断是否有传onRejected回调，如果无，则需抛出异常
+           onRejected = onRejected || (err => { throw err })
+           // 每次调then方法之前判断是否有传onFulfilled回调，如果无，则返回final回调
+           onFulfilled = onFulfilled || (value => { return value })
+   
+           return new WPromise((resolve, reject) => {
+               // 1.如果调用then方法时，状态已经确定下来，则直接调用
+               if (this.status === FULFILLED && onFulfilled) {
+                   execFooWithCatchError(onFulfilled, this.value, resolve, reject)
+               }
+   
+               if (this.status === REJECTED && onRejected) {
+                   execFooWithCatchError(onRejected, this.reason, resolve, reject)
+               }
+   
+               // 2.将then方法回调加入数组
+               if (this.status === PENDING) {
+                   this.onFulfilledFns.push(() => {
+                       // 取到第一次then的返回值，判断返回值类型是否为异常
+                       execFooWithCatchError(onFulfilled, this.value, resolve, reject)
+                   })
+                   this.onRejectedFns.push(() => {
+                       // 取到第一次catch的返回值，判断返回值类型是否为异常
+                       execFooWithCatchError(onRejected, this.reason, resolve, reject)
+                   })
+               }
+           })
+       }
+   
+       catch(onRejected) {
+           return this.then(undefined, onRejected)
+       }
+   
+       finally(final) {
+           this.then(() => final(), () => final())
+       }
+   
+       // 类方法
+       static resolve(value) {
+           return new WPromise(resolve => resolve(value))
+       }
+   
+       static reject(reason) {
+           return new WPromise((resolve, reject) => reject(reason))
+       }
+   
+       static all(promiseArr) {
+           return new WPromise((resolve, reject) => {
+               const values = []
+               promiseArr.forEach(p => {
+                   p.then(res => {
+                       values.push(res)
+                       if (promiseArr.length === values.length) {
+                           // 当所有的promise数组的长度等于values数组的长度，表示所有promise都是fulfilled状态
+                           resolve(values)
+                       }
+                   }, err => {
+                       reject(err)
+                   })
+               })
+           })
+       }
+   
+       static allSettled(promiseArr) {
+           return new WPromise((resolve, reject) => {
+               const result = []
+               promiseArr.forEach(p => {
+                   // 无论promise状态时fulfilled还是rejected，都将结果添加到result数组
+                   p.then(res => {
+                       result.push({ status: FULFILLED, value: res })
+                       if (promiseArr.length === result.length) {
+                           resolve(result)
+                       }
+                   }, err => {
+                       result.push({ status: REJECTED, reason: err })
+                       if (promiseArr.length === result.length) {
+                           reject(result)
+                       }
+                   })
+               })
+           })
+       }
+   
+       static race(promiseArr) {
+           return new WPromise((resolve, reject) => {
+               promiseArr.forEach(p => {
+                   p.then(resolve, reject)
+               })
+           })
+       }
+   
+       static any(promiseArr) {
+           // resolve必须等到有一个成功的结果
+           // reject所有的都失败才执行reject
+           return new WPromise((resolve, reject) => {
+               const result = []
+               promiseArr.forEach(p => {
+                   p.then(resolve, err => {
+                       reason.push(err)
+                       if (reason.length === p.length) {
+                           reject(new Error(reason))
+                       }
+                   })
+               })
+           })
+       }
+   }
+   
+   const p1 = new WPromise((resolve, reject) => {
+       resolve('ok')
+       // reject('err')   
+       // throw new Error('err0')
+   })
+   
+   const p2 = new WPromise((resolve, reject) => {
+       setTimeout(() => resolve('p2'), 1000)
+   })
+   
+   // then多次调用
+   p1.then(res => console.log(res), err => console.log(err)) // ok
+   p1.then(res => console.log(res, '2'), err => console.log(err)) // ok 2
+   
+   // then链式调用
+   p1
+       .then(res => {
+           console.log('res1', res) // res1 ok
+           return '1'
+       }, err => {
+           console.log('err1', err) 
+           throw new Error('err1')
+       })
+       .then(res => {
+           console.log('res2', res) // res2 1
+       }, err => {
+           console.log(err)
+       })
+   
+   // catch方法实现
+   p1
+       .then(res => console.log(res))
+       .catch(err => console.log('err1', err)) // err1 err
+   
+   // finally方法的实现
+   p1
+       .then(res => console.log(res))
+       .catch(err => console.log(err))
+       .finally(() => console.log('final')) // final
+   
+   // WPromise.all([])类方法的实现
+   const wp1 = WPromise.all([p1, p2])
+   wp1.then(res => console.log(res))
+   
+   // WPromise.allSettled([])类方法实现
+   const wp2 = WPromise.allSettled([p1, p2])
+   wp2.then(res => console.log(res))
+   /**
+    * [
+       { status: 'fullfilled', value: 'ok' },
+       { status: 'fullfilled', value: 'p2' }
+      ]
+    */
+   
+   // WPromise.race([])类方法的实现
+   const wp3 = WPromise.race([p1, p2])
+   wp3.then(res => console.log(res)) // ok
+   ```
 
+   
 
