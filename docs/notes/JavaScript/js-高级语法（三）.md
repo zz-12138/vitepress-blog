@@ -1165,5 +1165,82 @@ outline: deep
    wp3.then(res => console.log(res)) // ok
    ```
 
-   
+9. Promise类实现总结
+
+   * 构造函数的规划
+
+     ```js
+     class WPromise {
+         constructor(executor) {
+             // 定义状态
+             // 定义resolve，reject回调
+             // resolve执行微任务队列：改变状态、获取value、执行then传入回调
+             // reject执行微任务队列：改变状态、获取reason、执行then传入回调
+             
+             // try...catch
+             executor(resolve, reject)
+         }
+     }
+     ```
+
+   * then方法的实现
+
+     ```js
+     class WPromise {
+         constructor(executor) {
+             then(onFulfilled, onRejected) {
+                 // 1.onFulfilled、onRejected 添加默认值
+                 
+                 // 2.返回一个WPromise resolve/reject
+                 
+                 // 3.判断之前的promise状态是否确定
+                 // onFulfilled、onRejected直接执行，获取返回值调用resolve，捕获异常调用reject
+                 
+                 // 4.添加到数组中push(() => { onFulfulled()/onRejected() })
+             }
+         }
+     }
+     ```
+
+   * catch方法的实现
+
+     ```js
+     class WPromise {
+     	constructor(executor) {
+             catch(onRejected) {
+                 return this.then(undefined, onRejected)
+             }		
+     	}
+     }
+     ```
+
+   * finally方法的实现
+
+     ```js
+     class WPromise {
+         constructor(executor) {
+             finally(final) {
+                 this.then(() => final(), () => final())
+             }
+         }
+     }
+     ```
+
+   * all/allSettled类方法的实现
+
+     ```js
+     //重点在于确定new Promise的resolve、reject在什么时候执行
+     
+     // all：所有的promise都有结果/有一个由reject
+     // allSettled：所有都有结果，并不一定执行resolve
+     ```
+
+   * race/any类方法的实现
+
+     ```js
+     //race：只要一个有结果就resolve
+     //any：必须等到一个resolve/都没有则reject
+     ```
+
+     
 
