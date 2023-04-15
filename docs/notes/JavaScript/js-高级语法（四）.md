@@ -174,7 +174,117 @@ outline: deep
      const { name, age } = { ...obj }
      ```
 
-     
+7. 封装一个可迭代对象类
+
+   ```js
+   // 创建一个类，该类创建出来的对象都是可迭代对象
+   class Room {
+       constructor(name, address, stu) {
+           this.name = name
+           this.address = address
+           this.stu = stu
+       }
+   
+       entry(stu) {
+           if (!stu) return 
+           this.stu.push(stu)
+       }
+   
+       [Symbol.iterator]() {
+           let index = 0
+           return {
+               next: () => {
+                   if (index < this.stu.length) {
+                       return { done: false, value: this.stu[index ++] }
+                   } else {
+                       return { done: true, value: undefined }
+                   }
+               },
+               return: () => {
+                   return { done: true, value: undefined }
+               }
+           }
+       }
+   }
+   
+   const room = new Room('A room', '301', ['wall'])
+   room.entry('zz')
+   
+   for (const stu of room) {
+       // 终端迭代器
+       if (stu === 'zz') {
+           break
+       }
+       console.log(stu) // wall
+   }
+   ```
+
+8. 迭代器的中断：迭代器在某些情况下会在没有完全迭代的情况下中断
+
+   * 比如遍历过程中通过break、continue、return、throw中断了循环
+   * 比如在解构时，没有解构所有的值
+
+## 生成器 generator
+
+1. 概念：生成器时es6中新增的一种函数控制和使用方案，它可以让我们更加灵活的控制函数什么时候能继续执行、暂停执行等
+
+2. 生成器函数
+
+   * 首先生成器函数需要在function的后面加一个符号*
+   * 其次生成器函数可以通过yield关键字来控制函数的执行流程
+   * 最后生成器函数的返回值是一个Generator（生成器）
+   * 生成器其实是一种特殊的迭代器
+
+3. 生成器函数实现
+
+   ```js
+   // 生成器
+   // 该函数返回一个生成器（一个特殊的迭代器），调用一次next方法，执行到yield暂停，yield后面跟每次next返回对象的value值
+   function* foo() {
+       console.log('foo is running')
+   
+       const value1 = 'one'
+       console.log(value1)
+       yield value1
+   
+       const value2 = 'two'
+       console.log(value2)
+       yield value2
+   
+       const value3 = 'three'
+       console.log(value3)
+       yield value3
+   
+       console.log('foo is end')
+   }
+   
+   const generatorFoo = foo()
+   console.log('return 1', generatorFoo.next())
+   // foo is running
+   // one
+   // return 1 { value: one, done: false }
+   
+   console.log('return 2', generatorFoo.next())
+   // return 1 { value: two, done: false }
+   // two
+   
+   
+   console.log('return 3', generatorFoo.next()) 
+   // three
+   // return 3 { value: three, done: false }
+   
+   console.log('return 4', generatorFoo.next())
+   // foo is end
+   // return 4 { value: undefined, done: true }
+   ```
+
+4. 
+
+
+
+
+
+
 
 
 
