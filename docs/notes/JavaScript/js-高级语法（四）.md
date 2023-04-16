@@ -240,53 +240,164 @@ outline: deep
    ```js
    // 生成器
    // 该函数返回一个生成器（一个特殊的迭代器），调用一次next方法，执行到yield暂停，yield后面跟每次next返回对象的value值
-   function* foo() {
+   // 下一次next方法的参数会作为上一次yield的返回值
+   function* foo(i) {
        console.log('foo is running')
    
-       const value1 = 'one'
+       const value1 = i
        console.log(value1)
-       yield value1
+       const n = yield value1
    
-       const value2 = 'two'
+       const value2 = n
        console.log(value2)
-       yield value2
+       const m = yield value2
    
-       const value3 = 'three'
+       const value3 = m
        console.log(value3)
        yield value3
    
        console.log('foo is end')
+       return 'over'
    }
    
-   const generatorFoo = foo()
+   const generatorFoo = foo('one')
    console.log('return 1', generatorFoo.next())
    // foo is running
    // one
    // return 1 { value: one, done: false }
    
-   console.log('return 2', generatorFoo.next())
+   console.log('return 2', generatorFoo.next('two'))
    // return 1 { value: two, done: false }
    // two
    
    
-   console.log('return 3', generatorFoo.next()) 
+   console.log('return 3', generatorFoo.next('three')) 
    // three
    // return 3 { value: three, done: false }
    
    console.log('return 4', generatorFoo.next())
    // foo is end
-   // return 4 { value: undefined, done: true }
+   // return 4 { value: over, done: true }
    ```
 
-4. 
+4. 生成器函数return和throw
 
+   ```js
+   function* generator(n) {
+       console.log(n)
+       const m = yield n
+   
+       console.log(m)
+       const k = yield m
+   
+       console.log(k)
+       const v = yield k
+   
+       return 'over'
+   }
+   
+   const fn = generator(1)
+   
+   console.log(fn.next())
+   console.log(fn.return(2))
+   // 相当于在第一段代码后面加上了return，会提前终止生成器函数代码继续执行
+   // console.log(fn.throw(2))
+   // 第二段代码会抛出异常，可捕获
+   console.log(fn.next(3))
+   console.log(fn.next())
+   /** 
+    *  1
+       { value: 1, done: false }
+       { value: 2, done: true }
+       { value: undefined, done: true }
+       { value: undefined, done: true }
+    */
+   ```
 
+5. 生成器替代迭代器函数
 
+   ```js
+   // 生成器替代迭代器
+   function* createArrayIterator(arr) {
+       // 写法一
+       // for (const i of arr) {
+       //     yield i
+       // }
+   
+       // 写法二：yield* 后面跟可迭代对象
+       yield* arr
+   }
+   
+   const names = ['wall', 'zz', 'kobe']
+   const namesIterator = createArrayIterator(names)
+   console.log(namesIterator.next())
+   console.log(namesIterator.next())
+   console.log(namesIterator.next())
+   console.log(namesIterator.next())
+   /**
+    *  { value: 'wall', done: false }
+       { value: 'zz', done: false }
+       { value: 'kobe', done: false }
+       { value: undefined, done: true }
+    */
+   
+   // 创建一个函数，这个函数可以迭代一个范围内的数字
+   function* createRangesIterator(start, end) {
+       let index = start
+       while (index < end) {
+           yield index++
+       }
+   }
+   
+   const ranges = createRangesIterator(10, 15)
+   for (let i = 0; i < 5; i ++) {
+       console.log(ranges.next())
+   }
+   /**
+    *  { value: 10, done: false }
+       { value: 11, done: false }
+       { value: 12, done: false }
+       { value: 13, done: false }
+       { value: 14, done: false }
+    */
+   
+   // class案例
+   class Room {
+       constructor(name, address, rooms) {
+           this.name = name
+           this.address = address
+           this.rooms = rooms
+       }
+   
+       entry(room) {
+           this.rooms.push(room)
+       }
+   
+       *[Symbol.iterator]() {
+           yield* this.rooms
+       }
+       // 相当于
+       // [Symbol.iterator]() {
+       //     const _this = this
+       //     let index = 0
+       //     return {
+       //         next() {
+       //             if (index < _this.rooms.length) {
+       //                 return { done: false, value: _this.rooms[index++] }
+       //             } else {
+       //                 return { done: true, value: undefined }
+       //             }
+       //         }
+       //     }
+       // }
+   }
+   
+   const room = new Room('A', '201', ['wall', 'zz'])
+   room.entry('kobe')
+   
+   for (const r of room) {
+       console.log(r) // wall, zz, kobe
+   }
+   ```
 
-
-
-
-
-
-
-
+6. 

@@ -275,27 +275,26 @@ outline: deep
 		bindFoo4(2, 3) //5 [String: 'bind']，此处显示绑定优先级大于默认绑定
 		```
 
-     ​    
-
-		* new绑定：
-			* js中的函数可以当作一个类的构造函数来使用，也就是可以使用new关键字
+     * new绑定：
+	* js中的函数可以当作一个类的构造函数来使用，也就是可以使用new关键字
 			* 使用new关键字来调用函数，会执行以下操作
 				* 创建一个全新对象
 				* 这个新对象会执行prototype连接
 				* 这个新对象会绑定到函数调用的this上（this的绑定在这个步骤完成）
 				* 如果函数没有返回其他对象，表达式会返回这个对象
-        ```js
-        // 4.new绑定
-        function Foo5(name) {
-            this.name = name
-        }
-        
-        const p1 = new Foo5('wall')
-        const p2 = new Foo5('deep')
-        console.log(p1, p2) //Foo5 { name: 'wall' } Foo5 { name: 'deep' }
-        // 1. 生成一个新对象obj；2.将此构造函数中的this指向新对象；3.返回新对象
-        ```
-		* 其他函数的绑定
+		```js
+		 // 4.new绑定
+      function Foo5(name) {
+          this.name = name
+      }
+      
+      const p1 = new Foo5('wall')
+      const p2 = new Foo5('deep')
+      console.log(p1, p2) //Foo5 { name: 'wall' } Foo5 { name: 'deep' }
+      // 1. 生成一个新对象obj；2.将此构造函数中的this指向新对象；3.返回新对象
+     ```
+     
+     * 其他函数的绑定
 		```js
 		/**内置函数this */
 		setTimeout(function () {
@@ -323,8 +322,8 @@ outline: deep
 		    console.log(i, this) //[i], window
 		})
 		```
-
-	* 绑定规则优先级
+		
+* 绑定规则优先级
 		* new > 显示绑定 > 隐式绑定 > 默认绑定
 		```js
 		/**显示绑定和隐式绑定比较 */
@@ -360,9 +359,9 @@ outline: deep
 		const bar = foo3.bind('foo')
 		const newObj3 = new bar() //foo3 {}
 		```
-
-    * 箭头函数的this
-		* 箭头函数不会绑定this、argument属性
+	
+ * 箭头函数的this
+   	* 箭头函数不会绑定this、argument属性
 		* 箭头函数不能作为构造函数来使用（new会报错）
 		```js
 		/**箭头函数this: 箭头函数会自动寻找上层作用域this */
