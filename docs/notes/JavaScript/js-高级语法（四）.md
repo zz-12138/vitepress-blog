@@ -400,4 +400,185 @@ outline: deep
    }
    ```
 
-6. 
+6. 异步代码的处理方案
+
+   ```js
+   const co = require('co')
+   
+   // 异步代码的处理方案
+   function requestData(url) {
+       return new Promise((resolve, reject) => {
+           setTimeout(() => {
+               if (url && url !== 'err') {
+                   resolve(url)
+               } else if (url === 'err') {
+                   reject('err')
+               }
+           }, 0)
+       })
+   }
+   
+   // 需求
+   // 1. url: ok -> res: ok
+   // 2. url: res + 'a' -> ok + 'a'
+   // 3. url: res + 'b' -> ok + 'ab'
+   
+   // 方式一：回调地狱
+   requestData('ok').then(res => {
+       requestData(res + 'a').then(res => {
+           requestData(res + 'b').then(res => {
+               console.log(res) // okab
+           })
+       })
+   })
+   
+   // 方案二：Promise中then的返回值
+   requestData('ok')
+                   .then(res => requestData(res + 'a'))  
+                   .then(res => requestData(res + 'b'))
+                   .then(res => console.log(res)) // okab
+   
+   // 方式三：Promise + generator
+   function* getData(url) {
+       const res1 = yield requestData(url)
+       const res2 = yield requestData(res1 + 'a')
+       const res3 = yield requestData(res2 + 'b')
+       const res4 = yield requestData(res3 + 'c')
+       console.log(res4) // okabc, okabc
+   }
+   
+   
+   // 手动执行生成器函数
+   const generator = getData('ok')
+   generator.next().value.then(res => {
+       generator.next(res).value.then(res => {
+           generator.next(res).value.then(res => {
+               generator.next(res).value.then(res => {
+                   generator.next(res)
+               })
+           })
+       })
+   })
+   
+   // 自动执行生成器函数
+   function execGenerator(genFn) {
+       const generator = genFn('ok')
+       // 记录该生成器迭代次数
+       let count = 0
+       
+       function exec(res) {
+           const result = generator.next(res)
+           // 如果done为true，迭代结束，返回value
+           if (result.done) {
+               console.log(count) // 4
+               return result.value
+           }
+           result.value.then(res => {
+               count ++
+               exec(res)
+           })
+       }
+   
+       exec()
+   }
+   
+   execGenerator(getData)
+   
+   // 使用co库自动执行生成器函数
+   co(getData('ok')) // okabc
+   
+   // 方式四：async/await
+   async function getDataByAsync(url) {
+       const res1 = await requestData(url)
+       const res2 = await requestData(res1 + 'a')
+       const res3 = await requestData(res2 + 'b')
+       const res4 = await requestData(res3 + 'c')
+       console.log(res4) // okabc
+   } 
+   
+   getDataByAsync('ok')
+   ```
+
+## 异步函数 async function
+
+1. async 关键字用于声明一个异步函数
+
+2. 异步函数的执行流程
+
+   * 异步函数内部如果没有异步操作，执行流程与同步代码一致
+
+3. 异步函数同普通函数的区别
+
+   * 异步函数的返回值一定是一个promise
+
+   * ```js
+     // 异步函数返回一个promise
+     async function foo(type) { return type }
+     
+     foo('wall').then(res => console.log(res)) // wall
+     
+     foo({
+         then: function(resolve, reject) {
+             resolve('thenable')
+         }
+     }).then(res => console.log(res)) // thenable
+     
+     foo(new Promise((resolve, reject) => {
+         resolve('promise')
+     })).then(res => console.log(res)) // promise
+     ```
+
+   * 异步函数内部抛出异常
+
+     ```js
+     async function bar() {
+         // 异步函数中的异常，会被作为异步函数返回的Promise的reject值
+         console.log('bar start')
+         throw new Error('err msg')
+     }
+     
+     bar().catch(err => console.log(err.toString())) //
+     
+     console.log('bar end')
+     ```
+
+4. 异步函数中使用await关键字
+
+   ```js
+   // 异步函数中使用关键字
+   
+   // 1.返回值为promise(thenable)
+   function request(url) {
+       return new Promise((resolve, reject) => {
+           setTimeout(() => {
+               if (url !== 'err') {
+                   resolve(url)
+               } else {
+                   reject(url)
+               }
+           }, 1000)
+       })
+   }
+   
+   async function getData() {
+       // await后边跟promise对象，返回值即该promise的resolve值
+       // 每次执行到await，会等待该promise状态改变成fulfilled，堵塞后边代码执行
+       const res1 = await request('ok')
+       // promis后边的同步代码即then的回调
+       console.log(res1) // ok
+   
+       const res2 = await request('okk')
+       console.log(res2) // okk
+   
+       // 对于promise调用reject或抛出异常，需要捕获异常，防止代码执行中断
+       try {
+           const res3 = await request('err')
+       } catch (err) {
+           console.log(err) // err
+       }
+   }
+   
+   getData()
+   ```
+
+5. 
