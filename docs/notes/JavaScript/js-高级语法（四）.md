@@ -581,4 +581,69 @@ outline: deep
    getData()
    ```
 
-5. 
+
+## 事件循环
+
+1. 进程和线程
+   * 进程：计算机已运行的应用程序，是操作系统管理程序的一种方式
+   * 线程：操作系统能够运行运算调度的最小单元，通常情况下他被包含在进程中
+   
+2. 操作系统的工作方式：操作系统是如何在多个进程中同时工作呢
+   * 这是因为CPU的运算速度非常快，它可以快速的在多个进程之间迅速切换
+   * 当我们进程中的线程获取到时间片时，就可以快速执行我们的代码
+   * 对于用户来说是感受不到这种速度的
+   
+3. 浏览器中的JavaScript线程
+   * JavaScript是单线程的，他的进程容器一般是：浏览器或者nodejs
+   * 多数浏览器都是多进程的，每开一个tab页面就会开启一个新的进程，这是防止页面卡死造成所有页面无法响应
+   * 每个进程又有很多线程，其中包括执行JavaScript代码的线程、渲染页面线程...
+   
+4. JavaScript代码的执行
+   * 由于JavaScript代码是在一个线程里执行的，同一时刻只能做一件事
+   * 如果这件事非常耗时，那么就会堵塞当前线程
+   
+5. 对于真正耗时的操作，实际上并不是由JavaScript线程在执行
+   * 因为每个tab页面是多线程的，那么就可以由**其他线程来完成这些耗时操作**
+   * 比如**网络请求、定时器**，我们只需要**在特定的时候执行相应的回调**
+   
+6. 宏任务队列和微任务队列
+   * 宏任务：ajax、setTimeout、setInterval、dom监听、ui rending等
+   * 微任务：Promise的then回调、Mutation Observer API、queueMicrotask()等
+   
+7. 事件循环顺序
+
+   * main script中的代码优先执行
+   * 在执行**宏任务（不是红任务队列，是宏任务）**之前会先清空微任务队列
+
+8. 面试题
+
+   ```js
+   // 事件循环面试题
+   Promise.resolve().then(() => {
+       console.log(0)
+   
+       // 1.直接return一个值，相当于resolve(4)
+       // return 4 //0142356
+   
+       // 2.return thenable，多加一层微任务
+       // return {
+       //     then: (resolve, reject) => resolve(4) //0124356
+       // }
+   
+       // 3.return Promise Promise.resolve
+       // 一共多加两次微任务
+       return Promise.resolve(4) // 0123456
+   }).then(res => console.log(res))
+   
+   Promise.resolve().then(() => {
+       console.log(1)
+   }).then(() => console.log(2))
+     .then(() => console.log(3))
+     .then(() => console.log(5))
+     .then(() => console.log(6))
+   ```
+
+9. nodejs中的事件循环
+
+
+
