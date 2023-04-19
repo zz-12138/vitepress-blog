@@ -645,5 +645,126 @@ outline: deep
 
 9. nodejs中的事件循环
 
+   * 概念：**事件循环就像一个桥梁**，连接着应用程序的**JavaScript和系统调用**之间的通道
+     * 无论是文件io、数据库、网络io、定时器、子进程，在完成对应的操作后，都会将**对应的结果和回调函数**放到事件循环（任务队列）中
+     * 事件循环会不断的从**任务队列中取出对应的事件（回调函数）**来执行
 
+   * 执行流程
+     * 先开启一个node进程
+     * node进程是多线程
+     * js线程执行同步代码
+     * setTimeout、文件读取（IO）、网络请求等由其他线程执行
+     * 通过任务队列将回调函数加入到主线程中
+   * libuv
+     * libuv是一个多平台专注于异步io的库，最初是为node开发的
+     * libuv主要维护了一个EventLoop和Worker threads（线程池）
+     * EventLoop负责调用系统的一些其他操作：文件io、Network、child-process等
+     * ![](../../public/node架构.png)
+   * node一次完整的事件循环tick分成很多阶段
+     * 定时器（Timers）：本阶段执行已经被setTimeout、setInterval调度的回调函数
+     * 待定回调（pending callback）：对某些系统操作（如tcp错误类型）执行回调，比如tcp连接时收到ECONNREFUSED
+     * idle，prepare：仅系统内部使用
+     * 轮询（Poll）：检索新的io事件、执行与io相关回调
+     * 检测（check）：setImmediate回调在这里执行
+     * 关闭回调函数：一些关闭的回调函数，如socket.io('close', ...)
+   * 宏任务队列
+     * timer queue：setTimeout、setInterval
+     * poll queue：io事件
+     * check queue：setImmediate
+     * close queue：close事件
+   * 微任务队列
+     * next tick queue：process.nextTick
+     * other queue：Promise的then回调、queueMicrotask
 
+10. node和浏览器时间循环的区别
+
+    * node中事件循环是由libuv这个库实现的，浏览器是基于HTML5定义的规范来实现的
+
+## 错误处理方案
+
+1. 错误的类型：通常使用Error类创建一个实例抛出
+
+   ```js
+   function foo() {
+   	throw new Error('err')
+   }
+   ```
+
+2. Error包含三个属性
+
+   * message：创建Error对象传入的message
+   * name：Error名称，通常和类的名称一致
+   * stack：整个Error的错误信息，包含函数的调用栈
+
+3. Error的一些子类
+
+   * RangeError：下标越界时使用的错误类型
+   * SyntaxError：解析语法错误时使用的错误类型
+   * TypeError：出现类型错误时，使用的错误类型
+
+4. 异常的处理方式
+
+   * 不处理，异常会一层一层抛出直至最顶层的调用，如果在最顶层也没有对该异常处理，程序会终止并报错
+
+     ```js
+     function bar() {
+         throw new Error('err')
+     }
+     
+     function foo() {
+         bar()
+     }
+     
+     function demo() {
+         foo()
+     }
+     
+     demo()
+     // 报错信息及调用栈
+     /**
+      * Error: err
+         at bar (D:\workspace\demo\js\src\Day-32.js:15:11)
+         at foo (D:\workspace\demo\js\src\Day-32.js:19:5)
+         at demo (D:\workspace\demo\js\src\Day-32.js:23:5)
+         at Object.<anonymous> (D:\workspace\demo\js\src\Day-32.js:26:1)
+      */
+     ```
+
+   * 处理异常，通过try...catch语句进行处理，不会终止后面代码执行
+
+     ```js
+     // 异常捕获处理
+     const p = Promise.reject('err')
+     
+     async function getData() {
+         try {
+             const res = await p
+         } catch (err) {
+             console.log(err)
+         } finally {
+             // 无论是否发生异常，都会执行
+             console.log('ok')
+         }
+         console.log('end')
+     }
+     getData()
+     ```
+
+## 模块化开发
+
+1. 模块化开发概念
+   * 模块化开发最终目的是将程序划分成一个个小的结构
+   * 在这个结构中编写属于自己的逻辑代码，有自己的作用域，不会影响到其他结构
+   * 这个结构可以将自己希望暴露的变量、函数、对象等导出给其他结构使用
+   * 也可以通过某种方式，导入另外结构中的变量、函数、对象等
+2. CommonJs
+   * CommonJs是一个规范，最初提出来是在浏览器之外的地方使用
+   * Node是CommonJs在服务器端一个具有代表性的实现
+   * Browserify是CommonJs在浏览器中的一种实现
+   * webpack打包工具具备对CommonJs的支持
+3. Node中对Commonjs进行了支持和实现，方便进行模块化开发
+   * 在node中每一个js文件都是一个单独的模块
+   * 这个模块中包含CommonJs规范的核心变量：exports、module.exports、require
+   * 我们可以使用这些变量来进行模块化开发
+4. CommonJs的导入和导出
+   * 
