@@ -767,4 +767,68 @@ outline: deep
    * 这个模块中包含CommonJs规范的核心变量：exports、module.exports、require
    * 我们可以使用这些变量来进行模块化开发
 4. CommonJs的导入和导出
-   * 
+   
+   * 导出方案：`module.exports`、`exports`
+   
+     ```js
+     // 1.module.exports导出，本质是一个对象
+     const info = {
+         name: 'wall',
+         age: 18
+     }
+     
+     // 1s后修改name属性
+     setTimeout(() => {
+         info.name = 'zz'
+     }, 1000)
+     
+     module.exports = info
+     
+     // 2.exports导出
+     /**
+      * 本质：最终导出的只有module.exports
+         module.exports = {}
+         exports = module.exports
+         所以可以
+         exports.name = 'wall'
+         不行
+         exports = {}
+      */
+     ```
+   
+   * 导入方案：`require()`
+   
+     ```js
+     // 1.require()导入，是一个函数，该函数返回的对象就是module.exports指向的对象
+     const { name, age } = require('./xx.js')
+     const info = require('./Day-33-1.js')
+     
+     // 2s后打印name属性
+     setTimeout(() => {
+         console.log(info.name) // zz
+     }, 2000)
+     ```
+   
+   * require查找规则，require(x)
+   
+     * 情况一：x是一个node核心模块，如http、fs、path等，直接返回核心模块
+     * 情况二：x是一个路径('./x.js')
+       * 如果有后缀名，按照后缀名查找对应文件
+       * 如果没有后缀名，按照`x->x.js->x.json->x.node`顺序查找
+       * 如果没有找到对应的文件，将x作为一个目录查找目录下面的index文件
+     * 情况三：如果x既不是一个核心模块，也不是一个路径，会一直向上查找node_modules文件夹，没有则报not found
+   
+   * 模块的加载过程
+   
+     * 模块在被第一次引入时，模块中的js代码会被运行一次
+     * 模块被多次引用，会缓存，最终只加载一次，因为每个模块对象module都有一个loaded属性记录是否已加载
+     * 如果有循环引用
+       * node会采用图结构中的深度优先搜索算法：`mian->aaa->ccc->ddd->eee->bbb`
+       * ![](../../public/node模块循环引用.png)
+   
+   * CommonJs规范的缺点
+   
+     * CommonJs加载模块是同步的，这就意味着对应的模块加载完成，当前模块中的内容才能被运行
+     * 如果在浏览器中因为网络请求堵塞了js文件的下载，那么整个应用程序都会堵塞
+     * 所以在浏览器中一般不适用CommonJs规范
+     * 在打包工具中一般会使用
