@@ -757,15 +757,18 @@ outline: deep
    * 在这个结构中编写属于自己的逻辑代码，有自己的作用域，不会影响到其他结构
    * 这个结构可以将自己希望暴露的变量、函数、对象等导出给其他结构使用
    * 也可以通过某种方式，导入另外结构中的变量、函数、对象等
+   
 2. CommonJs
    * CommonJs是一个规范，最初提出来是在浏览器之外的地方使用
    * Node是CommonJs在服务器端一个具有代表性的实现
    * Browserify是CommonJs在浏览器中的一种实现
    * webpack打包工具具备对CommonJs的支持
+   
 3. Node中对Commonjs进行了支持和实现，方便进行模块化开发
    * 在node中每一个js文件都是一个单独的模块
    * 这个模块中包含CommonJs规范的核心变量：exports、module.exports、require
    * 我们可以使用这些变量来进行模块化开发
+   
 4. CommonJs的导入和导出
    
    * 导出方案：`module.exports`、`exports`
@@ -832,3 +835,160 @@ outline: deep
      * 如果在浏览器中因为网络请求堵塞了js文件的下载，那么整个应用程序都会堵塞
      * 所以在浏览器中一般不适用CommonJs规范
      * 在打包工具中一般会使用
+   
+5. 其他模块化规范（AMD、CMD）
+
+   * AMD规范
+
+     ```js
+     // foo.js
+     define(function() {
+         const name = 'wall'
+         const age = 18
+         function sum(a, b) {
+             return a + b
+         }
+         
+         return {
+             name,
+             age,
+             sum
+         }
+     })
+     
+     // main.js
+     require.config({
+         baseUrl: './src',
+         paths: {
+             foo: './foo'
+         }
+     })
+     
+     require(['foo'], function(foo) {
+         console.log('main: ', foo)
+     })
+     ```
+
+   * CMD规范：吸收了AMD和CommonJs的优点，实现了异步加载
+
+     ```js
+     // foo.js
+     define(function(require, exports, module) {
+         const name = 'wall'
+         const age = 18
+         function sum(a, b) {
+             return a + b
+         }
+         
+         module.exports =  {
+             name,
+             age,
+             sum
+         }
+     })
+     
+     // main.js
+     define(function(require, exports, module) {
+         const foo = require('./foo')
+         console.log('main: ', foo)
+     })
+     ```
+
+6. ES Module：JavaScript自带的模块化规范
+
+   * ES Module和CommonJs的模块化有一些不同之处
+     * 一方面它使用了import和export关键字
+     * 另一方面它采用编译器静态分析，并且也加入了动态引入的方式
+     * 自动采用严格模式：'use strict'
+     
+   * 导入和导出
+   
+     * 导入
+   
+       ```js
+       // ES Module模块化导入
+       
+       // 导入方式一
+       import { name, age, value1, newValue } from './Day-34-1.js'
+       
+       // 导入方式二：导入时给变量起别名起别名
+       import { name as newName } from './Day-34-1.js'
+       
+       // 导出方式三：将所有导出内容放在一个标识符中
+       import * as _ from './Day-34-1.js'
+       
+       // 导入方式四：默认导入
+       import foo from './Day-34-1.js'
+       
+       console.log(name, age) // wall, 18
+       console.log(value1, newValue) // zz, 18
+       
+       console.log(_.name) // wall
+       
+       
+       export const a = 'a'
+       export const b = 'b'
+       
+       console.log(foo(1, 2)) //3
+       ```
+   
+     * 导出
+   
+       ```js
+       // ES Module模块化导出
+       
+       // 导出方式一：基本导出
+       export const name = 'wall'
+       export const age = 18
+       
+       
+       // 导出方式二：统一导出
+       const value1 = 'zz'
+       const value2 = 18
+       // 此处为固定语法，并非一个对象
+       export {
+           value1,
+           // 导出变量可以起别名
+           value2 as newValue
+       }
+       
+       // 导出方式三：导入导出同时使用，此方式一般用作封装工具中index文件做统一导出
+       export { a, b } from './Day-34-2.js'
+       export * from './Day-34-2.js' // 导出所有
+       
+       
+       // 默认导出：一般用作最重要的文件导出，默认导出只能有一个
+       export default function foo(a, b) {
+           return a + b
+       }
+       ```
+   
+   * import()函数的使用
+   
+     * import()函数返回的结果是一个Promise
+   
+       ```js
+       // import()函数的使用：返回一个Promise
+       // 该文件下载好之后自动调用then函数的callback，不会堵塞主线程代码执行
+       import('./Day-34-1.js').then(res => console.log(res)) // 返回值是一个包含了模块内容的对象
+       
+       console.log(import.meta) // {url: 'http://127.0.0.1:5500/js/src/Day-34-2.js', resolve: ƒ}
+       ```
+   
+   * ES Module原理解析：分三阶段
+   
+     * 阶段一：构建，根据地址查找js文件，并且下载，将其解析成模块记录
+   
+       ![](D:../../public/es module构建阶段.png)
+   
+     * 阶段二：实例化，对模块记录进行实例化，并且分配内存空间，解析模块的导入和导出语句，把模块指向对应的内存地址
+   
+     * 阶段三：运行，运行代码，计算值，并将值填充到内存中，不允许导入者修改导入变量的值
+   
+       ![](D:../../public/es module构建阶段二.png)
+   
+   * 关于CommonJs和ES Moudle是否能相互导入
+   
+     * 浏览器环境：不行
+     * node环境：不同node版本有不同支持
+     * 平时基于webpack开发：支持
