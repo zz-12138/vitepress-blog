@@ -167,8 +167,8 @@ outline: deep
      * dependencies属性：开发环境和生产环境都需要的包
      * devDependencies属性：旨在开发环境需要的包，如webpack、babel等，通过`-d`安装
      * peerDependencies属性：一个包需要依赖另外一个包作为前提
-     * ![](D:../../public/npm配置文件属性-1.png)
-     * ![](D:../../public/npm配置文件属性-2.png)
+     * ![](../../public/npm配置文件属性-1.png)
+     * ![](../../public/npm配置文件属性-2.png)
 
    * 依赖的版本管理
 
