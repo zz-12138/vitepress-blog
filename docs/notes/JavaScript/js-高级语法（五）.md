@@ -14,7 +14,7 @@ outline: deep
      * 通过工具将代码发布到特定位置
      * 别人可以通过工具来安装、删除、升级代码
 
-2. 包管理工具npm
+2. npm包管理工具
 
    * npm配置文件
 
@@ -181,5 +181,44 @@ outline: deep
        * ~x.y.z：表示x和y保持不变，z永远安装最新版本
      * 如果有packge-lock.json文件，会锁定当前版本安装
 
-   * 
+   * npm包安装
+   
+     * 全局安装：一般将一些工具属性的包安装到全局，如yarn、webpack等，`npm install webpack -g`
+     * 局部安装：一般将开发和生产时需要引入的包安装到项目，如vue、axios、koa等，`npm install axios`
+     * ![](../../public/npm安装包原理图.png)
+   
+   * packge-lock.json文件解析
+   
+     * lockfileVersion：lock文件的版本
+     * requires：使用requires来跟踪模块依赖的关系
+     * dependencies：项目的依赖
+       * version：表示当前包的版本
+       * resolved：用来记录下载的地址，registry仓库中的位置
+       * requires：记录当前模块的依赖
+       * intergrity：用来从记录缓存中获取索引，在通过索引去压缩文件
+   
+3. yarn包管理工具
 
+   * 一个新的包管理工具，react项目多见，解决了早期npm安装速度慢，代码依赖混乱等问题
+   * ![](../../public/npm和yarn命令对比.png)
+
+4. npx工具
+
+   * 作用：主要是用来调用项目中某个模块的指令
+   * 局部命令的执行：
+     * 方式一：明确到node_modules文件夹下面的命令
+     * 方式二：在packge.json中定义script脚本，执行相关命令
+     * 方式三：使用npx，`npx webpack --version`
+
+## JSON-数据储存
+
+1. json是一种非常重要的数据格式，一种在客户端和服务端之间传输的数据结构
+   * 目前很多编程语言都实现了将json转成对应模型的方式
+2. 其他传输格式
+   * XML：早期网络传输主要使用XML来进行数据交换的
+   * Protobuf：越来越多编程语言支持，但js支持较晚，用的较少
+3. json的应用场景也越来越多
+   * 网络数据传输json
+   * 项目的某些配置文件
+   * 非关系型数据库将json作为储存格式
+4. 
